@@ -2,25 +2,29 @@ import requests
 
 BASE_URL = "http://127.0.0.1:8000/api"
 
-print("=" * 50)
-print("TEST 2: Login Student (john@gmail.com)")
-print("=" * 50)
+print("TEST 1: Register")
+resp = requests.post(f"{BASE_URL}/students/register/", json={
+    "full_name": "Test User 3",
+    "email": "test3@test.com",
+    "mobile": "7777777777",
+    "password": "pass123"
+})
+print(f"  Status: {resp.status_code}")
 
+print("\nTEST 2: Login")
 resp = requests.post(f"{BASE_URL}/students/login/", json={
     "email": "john@gmail.com",
     "password": "123456"
 })
-print(f"Status: {resp.status_code}")
-data = resp.json()
-print(f"Response: {data}")
-access_token = data.get('access')
-print(f"Token: {access_token[:50]}..." if access_token else "No token")
+print(f"  Status: {resp.status_code}")
+token = resp.json().get('access')
+print(f"  Token: {'received' if token else 'missing'}")
 
-if access_token:
-    print("\n" + "=" * 50)
-    print("TEST 3: View Jobs (Authenticated)")
-    print("=" * 50)
-    headers = {"Authorization": f"Bearer {access_token}"}
-    resp = requests.get(f"{BASE_URL}/jobs/", headers=headers)
-    print(f"Status: {resp.status_code}")
-    print(f"Response: {resp.text}")
+print("\nTEST 3: View Jobs (with auth)")
+resp = requests.get(f"{BASE_URL}/jobs/", headers={"Authorization": f"Bearer {token}"})
+print(f"  Status: {resp.status_code}")
+print(f"  Response: {resp.text[:200]}")
+
+print("\nTEST 4: View Jobs (no auth)")
+resp = requests.get(f"{BASE_URL}/jobs/")
+print(f"  Status: {resp.status_code}")
